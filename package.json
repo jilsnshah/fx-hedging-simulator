@@ -1,0 +1,8 @@
+{
+  "name": "fx-hedging-simulator",
+  "version": "1.0.0",
+  "scripts": {
+    "install": "cd frontend && npm install",
+    "build": "cd frontend && npm run build && mv dist ../public"
+  }
+}
