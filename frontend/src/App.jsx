@@ -5,7 +5,7 @@ import KPISection from './components/KPISection';
 import Charts from './components/Charts';
 import StrategyDetails from './components/StrategyDetails';
 
-const API_URL = 'http://localhost:5173';
+const API_URL = '/api';
 
 function App() {
   const [dates, setDates] = useState([]);
