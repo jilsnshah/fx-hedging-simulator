@@ -1,7 +1,12 @@
 import numpy as np
-from scipy.stats import norm
+import math
 from typing import Dict, Any, List
 
+def norm_cdf(x: float) -> float:
+    return (1.0 + math.erf(x / math.sqrt(2.0))) / 2.0
+
+def norm_pdf(x: float) -> float:
+    return math.exp(-0.5 * x * x) / math.sqrt(2.0 * math.pi)
 
 # ── Black-Scholes ────────────────────────────────────────────────────────────
 
@@ -20,7 +25,7 @@ def black_scholes_call(S0: float, K: float, T: float, r: float, sigma: float) ->
     d1 = (np.log(S0 / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * sqrt_T)
     d2 = d1 - sigma * sqrt_T
 
-    price = S0 * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+    price = S0 * norm_cdf(d1) - K * np.exp(-r * T) * norm_cdf(d2)
     return float(price)
 
 
@@ -35,12 +40,12 @@ def black_scholes_greeks(S0: float, K: float, T: float, r: float, sigma: float) 
     d1 = (np.log(S0 / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * sqrt_T)
     d2 = d1 - sigma * sqrt_T
 
-    delta = norm.cdf(d1)
-    gamma = norm.pdf(d1) / (S0 * sigma * sqrt_T)
-    vega  = S0 * norm.pdf(d1) * sqrt_T / 100          # per 1% vol move
-    theta = (-(S0 * norm.pdf(d1) * sigma) / (2 * sqrt_T)
-             - r * K * np.exp(-r * T) * norm.cdf(d2)) / 365  # per day
-    rho   = K * T * np.exp(-r * T) * norm.cdf(d2) / 100       # per 1% rate move
+    delta = norm_cdf(d1)
+    gamma = norm_pdf(d1) / (S0 * sigma * sqrt_T)
+    vega  = S0 * norm_pdf(d1) * sqrt_T / 100          # per 1% vol move
+    theta = (-(S0 * norm_pdf(d1) * sigma) / (2 * sqrt_T)
+             - r * K * np.exp(-r * T) * norm_cdf(d2)) / 365  # per day
+    rho   = K * T * np.exp(-r * T) * norm_cdf(d2) / 100       # per 1% rate move
 
     return {
         "delta": float(delta),
