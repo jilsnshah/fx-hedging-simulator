@@ -43,8 +43,8 @@ api/index.py        Vercel serverless entrypoint
 ## Run locally
 
 ```bash
-# backend
-pip install -r requirements.txt
+# backend (requires Python 3.12 — see .python-version)
+pip install -e .
 uvicorn backend.main:app --reload
 
 # frontend
