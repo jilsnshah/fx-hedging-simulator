@@ -9,6 +9,7 @@ const NODE_H = 100;
 
 export default function BinomialTree({ treeData, bsPremium }) {
   const canvasRef = useRef(null);
+  const viewportRef = useRef(null);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 60, y: 400 });
   const [isDragging, setIsDragging] = useState(false);
@@ -55,8 +56,8 @@ export default function BinomialTree({ treeData, bsPremium }) {
 
   // ── Auto-fit whenever tree data changes ───────────────────────────────────
   const fitTree = () => {
-    const CANVAS_H = 630; // px (700px container − ~70px toolbar)
-    const CANVAS_W = canvasRef.current?.clientWidth ?? 900;
+    const CANVAS_H = viewportRef.current?.clientHeight || 630;
+    const CANVAS_W = viewportRef.current?.clientWidth || 900;
     // Tree vertical span: root=0, top terminal=-N*V_SPACING, bottom=+N*V_SPACING
     const treeH = (2 * N + 1) * V_SPACING + NODE_H;
     const treeW = N * H_SPACING + NODE_W;
@@ -162,7 +163,8 @@ export default function BinomialTree({ treeData, bsPremium }) {
       </div>
 
       {/* Canvas */}
-      <div 
+      <div
+        ref={viewportRef}
         className="flex-1 relative overflow-hidden cursor-grab active:cursor-grabbing bg-[#0a0f1c]"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -170,11 +172,7 @@ export default function BinomialTree({ treeData, bsPremium }) {
         onMouseLeave={handleMouseUp}
         onWheel={handleWheel}
       >
-        <svg 
-          width="100%" 
-          height="100%" 
-          style={{ transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`, transformOrigin: '0 0' }}
-        >
+        <svg width="100%" height="100%">
           <defs>
             <linearGradient id="rootGrad" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stopColor="#1e3a8a" stopOpacity="0.8" />
@@ -194,6 +192,7 @@ export default function BinomialTree({ treeData, bsPremium }) {
             </filter>
           </defs>
 
+          <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
           {/* Edges */}
           {treeData.map((stepNodes, step) => 
             step < N && isNodeVisible(step) ? stepNodes.map(node => {
@@ -276,6 +275,7 @@ export default function BinomialTree({ treeData, bsPremium }) {
               );
             })
           )}
+          </g>
         </svg>
 
         {/* BS Reference annotation (absolute-positioned over the SVG) */}

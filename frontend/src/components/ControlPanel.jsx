@@ -108,7 +108,7 @@ export default function ControlPanel({
                 <input 
                   type="range" 
                   name="tree_steps"
-                  min="10" max="500" step="10"
+                  min="2" max="500" step="1"
                   value={params.tree_steps}
                   onChange={handleChange}
                   className="flex-1 accent-primary"
