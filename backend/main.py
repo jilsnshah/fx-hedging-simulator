@@ -28,7 +28,7 @@ def startup_event():
     else:
         print(f"Warning: Data file not found at {file_path}")
 
-@app.get("/dates", response_model=List[str])
+@app.get("/api/dates", response_model=List[str])
 def get_dates():
     """Returns all valid dates."""
     dates = get_available_dates()
@@ -36,7 +36,7 @@ def get_dates():
         raise HTTPException(status_code=404, detail="No dates available")
     return dates
 
-@app.get("/currencies", response_model=List[str])
+@app.get("/api/currencies", response_model=List[str])
 def get_currencies():
     """Returns all available currency pairs."""
     currencies = get_available_currencies()
@@ -51,7 +51,7 @@ class SimulateRequest(BaseModel):
     risk_free_rate: float
     tree_steps: int = 100
 
-@app.post("/simulate")
+@app.post("/api/simulate")
 def simulate(req: SimulateRequest):
     try:
         dt = datetime.strptime(req.start_date, '%Y-%m-%d')
@@ -75,5 +75,18 @@ def simulate(req: SimulateRequest):
             currencies=currencies
         )
         return result
+    except ValueError as e:
+        # CRR needs d < e^(r*dt) < u. Few steps make dt coarse enough that the
+        # drift escapes the up/down move and p leaves [0, 1] — a bad request,
+        # not a server fault. The viable minimum rises with the risk-free rate
+        # and falls with volatility, so report it rather than guess a floor.
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Cannot price the tree with {req.tree_steps} step(s) at a "
+                f"{req.risk_free_rate:.2%} risk-free rate: {e} "
+                "Increase the tree steps or lower the rate."
+            ),
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

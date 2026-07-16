@@ -6,10 +6,11 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
+      // Routes are declared with the /api prefix, so pass the path through
+      // unchanged — the backend matches it verbatim, same as on Vercel.
       '/api': {
-        target: 'http://localhost:5173',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        target: 'http://localhost:8000',
+        changeOrigin: true
       }
     }
   }
